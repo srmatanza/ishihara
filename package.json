@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.0.0-beta.2",
+    "bezier-js": "^2.4.0",
+    "d3-quadtree": "1.0.6",
+    "point-in-svg-polygon": "^1.0.22",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.0"
@@ -27,5 +31,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "seedrandom": "^3.0.1"
   }
 }
