@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component } from 'react';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -9,13 +9,13 @@ import TextField from '@material-ui/core/TextField'
 import Dotfield from './Dotfield';
 import Ishihara from './Ishihara';
 
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
 
-class App extends Component {
+class App extends React.Component {
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       dots: {},
       dotSeed: 42,
@@ -102,7 +102,6 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" width="65" height="65"/>
           <span>
             Ishihara Plate Generator
           </span>

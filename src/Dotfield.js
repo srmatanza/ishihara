@@ -71,9 +71,18 @@ class Dotfield extends Component {
         this.updateCanvas();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
+        // console.log('Dotfield update: ', this.props, prevProps, this.state, prevState)
         this.state.arng = new alea(this.props.seed);
-        this.updateCanvas();
+        let bDiff = false
+        for(const p in this.props) {
+            if(!(p in prevProps && this.props[p] == prevProps[p])) {
+                bDiff = true
+            }
+        }
+        if(bDiff) {
+            this.updateCanvas();
+        }
     }
 
     updateCanvas() {
@@ -148,9 +157,9 @@ class Dotfield extends Component {
     }
 
     render() {
-        console.log(this.props);
+        // console.log(this.props);
         return (
-            <canvas ref="canvas" width={this.props.width} height={this.props.height}/>
+            <canvas id="dotfield" ref="canvas" width={this.props.width} height={this.props.height}/>
         )
     }
 }
