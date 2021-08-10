@@ -1,7 +1,7 @@
 import { quadtree } from 'd3-quadtree'
 import alea from 'seedrandom';
 
-const kLimit = 30
+const kLimit = 20
 
 function Dot(_x, _y, _r, _clr, _id) {
     return {
