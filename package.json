@@ -6,6 +6,7 @@
     "@material-ui/core": "^4.0.0-beta.2",
     "bezier-js": "^2.4.0",
     "d3-quadtree": "1.0.6",
+    "opentype.js": "^1.3.3",
     "point-in-svg-polygon": "^1.0.22",
     "poisson-disk-sampling": "^2.2.2",
     "react": "^16.8.6",

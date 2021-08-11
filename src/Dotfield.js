@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import alea from 'seedrandom';
 import pisp from 'point-in-svg-polygon';
 import Bezier from 'bezier-js';
+import opentype from 'opentype.js';
 
 import {Point} from './point';
 import {SDF} from './sdf';
@@ -69,6 +70,15 @@ class Dotfield extends Component {
     componentDidMount() {
         console.log("First arng: ", this.state.arng());
         this.updateCanvas();
+
+        opentype.load('NotoSans-Regular.ttf', function(err, font) {
+          if(err) { 
+            console.error('Could not load font.');
+          } else {
+            const path = font.getPath('7', 0, 0, 72);
+            console.log('path: ', path);
+          }
+        });
     }
 
     componentDidUpdate(prevProps, prevState) {
