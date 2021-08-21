@@ -54,7 +54,7 @@ var colorBrightness = function(hex, dBright) {
 
 // Draw the dotfield once, save the blending values for the dots inside or near the glyphs.
 
-class Dotfield extends Component {
+export default class IshiharaPlate extends Component {
 
     constructor(props) {
         super(props);
@@ -195,4 +195,4 @@ class Dotfield extends Component {
     }
 }
 
-export default Dotfield;
+// export default IshiharaPlate;

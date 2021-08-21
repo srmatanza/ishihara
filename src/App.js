@@ -6,7 +6,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField'
 
-import Dotfield from './Dotfield';
+import IshiharaPlate from './IshiharaPlate';
 import Ishihara from './Ishihara';
 
 // import logo from './logo.svg';
@@ -162,7 +162,7 @@ class App extends React.Component {
           <Button disabled={this.buttonEnabledState()} variant="contained" color="primary" onClick={this.clickRedraw.bind(this)}>Redraw</Button>
         </div>
         <div className="dotfield">
-          <Dotfield width="750" height="750" dots={this.state.dots} seed={this.state.dotSeed} offset={this.state.offset} padding={this.state.drawPadding} bFeather={this.state.feather} glyphs={this.state.glyphText} />
+          <IshiharaPlate width="750" height="750" dots={this.state.dots} seed={this.state.dotSeed} offset={this.state.offset} padding={this.state.drawPadding} bFeather={this.state.feather} glyphs={this.state.glyphText} />
         </div>
       </div>
     );
