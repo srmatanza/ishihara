@@ -11,7 +11,8 @@
     "poisson-disk-sampling": "^2.2.2",
     "react": "^16.8.6",
     "react-colorful": "^5.1.4",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "svg-path-parser": "^1.1.0"
   },
   "scripts": {
     "start": "webpack serve --config ./webpack.config.js --mode development",

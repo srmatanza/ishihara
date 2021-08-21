@@ -52,6 +52,8 @@ var colorBrightness = function(hex, dBright) {
     const hh = hexTriple(hex);
 }
 
+// Draw the dotfield once, save the blending values for the dots inside or near the glyphs.
+
 class Dotfield extends Component {
 
     constructor(props) {
@@ -59,30 +61,45 @@ class Dotfield extends Component {
         const initialSeed = props.seed||42;
         const segments = pisp.segments(sevenPath);
         console.log(segments);
+
         this.colorA = this.props.colorA||"#ff0000";
         this.colorB = this.props.colorB||"#000000";
         this.state = {
             arng: new alea(initialSeed),
-            pathSeg: segments
+            pathSeg: segments,
+            glyphPath: segments
         }
+
+        opentype.load('NotoSans-Regular.ttf', (err, font) => {
+          if(err) { 
+            console.error('Could not load font.');
+          } else {
+            this.loadedFont = font;
+            let _g1 = '2';
+            if(this.props.glyphs) {
+              _g1 =  this.props.glyphs[0];
+            }
+            const path = font.getPath(_g1, 0, 500, 720);
+            console.log('path: ', path.toPathData());
+            this.state.glyphPath = pisp.segments(path.toPathData());
+          }
+        });
+
     }
 
     componentDidMount() {
         console.log("First arng: ", this.state.arng());
-        this.updateCanvas();
-
-        opentype.load('NotoSans-Regular.ttf', function(err, font) {
-          if(err) { 
-            console.error('Could not load font.');
-          } else {
-            const path = font.getPath('7', 0, 0, 72);
-            console.log('path: ', path);
-          }
-        });
+        setTimeout(this.updateCanvas.bind(this), 0);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        // console.log('Dotfield update: ', this.props, prevProps, this.state, prevState)
+        console.log('Dotfield update: ', this.props, prevProps, this.state, prevState)
+        this.state.glyphPath = undefined;
+        if(this.loadedFont && this.props.glyphs.length > 0) {
+          const path = this.loadedFont.getPath(this.props.glyphs[0], 0, 500, 720);
+          console.log(`path: ${path.toPathData()}`);
+          this.state.glyphPath = pisp.segments(path.toPathData());
+        }
         this.state.arng = new alea(this.props.seed);
         let bDiff = false
         for(const p in this.props) {
@@ -91,7 +108,7 @@ class Dotfield extends Component {
             }
         }
         if(bDiff) {
-            this.updateCanvas();
+          setTimeout(this.updateCanvas.bind(this), 0);
         }
     }
 
@@ -120,42 +137,46 @@ class Dotfield extends Component {
             ctx.fillStyle = randFill;
             const ddx = dx - this.props.offset.x;
             const ddy = dy - this.props.offset.y;
-            if(pisp.isInside([ddx, ddy], this.state.pathSeg)) {
-                ctx.fillStyle = "#000";
-            } else if(this.props.bFeather) {
-                const maxRange = 750;
-                let minSqDist = maxRange;
-                // if it's not inside, then let's see how close we are --
-                for(const seg of this.state.pathSeg) {
-                    switch(seg.type) {
-                        case "line":
-                            const ptA = seg.coords[0];
-                            const ptB = seg.coords[1];
-                            const lineDist = SDF.sdLine(Point(ddx, ddy), Point(ptA[0], ptA[1]), Point(ptB[0], ptB[1]));
-                            minSqDist = Math.min(minSqDist, lineDist);
-                            break;
-                        case "bezier3":
-                            const curve = new Bezier(seg.coords[0][0],
-                                                     seg.coords[0][1],
-                                                     seg.coords[1][0],
-                                                     seg.coords[1][1],
-                                                     seg.coords[2][0],
-                                                     seg.coords[2][1],
-                                                     seg.coords[3][0],
-                                                     seg.coords[3][1]);
-                            const p = curve.project({x: ddx, y: ddy});
-                            const distSq = (ddx-p.x)*(ddx-p.x) + (ddy-p.y)*(ddy-p.y);
-                            minSqDist = Math.min(minSqDist, distSq);
-                            break;
-                    }
-                }
-                if(minSqDist < maxRange) {
 
-                    const pct = minSqDist/maxRange;
-                    const fillClr = blendHexColors("#000000", randFill, pct);
+            const pathSegments = this.state.glyphPath;
+            if(pathSegments) {
+              if(pisp.isInside([ddx, ddy], pathSegments)) {
+                  ctx.fillStyle = "#000";
+              } else if(this.props.bFeather) {
+                  const maxRange = 750;
+                  let minSqDist = maxRange;
+                  // if it's not inside, then let's see how close we are --
+                  for(const seg of pathSegments) {
+                      switch(seg.type) {
+                          case "line":
+                              const ptA = seg.coords[0];
+                              const ptB = seg.coords[1];
+                              const lineDist = SDF.sdLine(Point(ddx, ddy), Point(ptA[0], ptA[1]), Point(ptB[0], ptB[1]));
+                              minSqDist = Math.min(minSqDist, lineDist);
+                              break;
+                          case "bezier3":
+                              const curve = new Bezier(seg.coords[0][0],
+                                                       seg.coords[0][1],
+                                                       seg.coords[1][0],
+                                                       seg.coords[1][1],
+                                                       seg.coords[2][0],
+                                                       seg.coords[2][1],
+                                                       seg.coords[3][0],
+                                                       seg.coords[3][1]);
+                              const p = curve.project({x: ddx, y: ddy});
+                              const distSq = (ddx-p.x)*(ddx-p.x) + (ddy-p.y)*(ddy-p.y);
+                              minSqDist = Math.min(minSqDist, distSq);
+                              break;
+                      }
+                  }
+                  if(minSqDist < maxRange) {
 
-                    ctx.fillStyle = fillClr;
-                }
+                      const pct = minSqDist/maxRange;
+                      const fillClr = blendHexColors("#000000", randFill, pct);
+
+                      ctx.fillStyle = fillClr;
+                  }
+              }
             }
             ctx.fill();
 

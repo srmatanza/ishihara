@@ -19,6 +19,7 @@ class App extends React.Component {
     this.state = {
       dots: {},
       dotSeed: 42,
+      glyphText: '2',
       offset: {x: 200, y: 100},
       minSize: 4,
       maxSize: 23,
@@ -108,6 +109,19 @@ class App extends React.Component {
         </header>
         <div className="controlPanel">
           <TextField
+            id="inGlyphText"
+            label="Glyph Text"
+            value={this.state.glyphText}
+            onChange={(e) => {
+              if(e.target.value.length > 2) {
+                e.target.value = e.target.value.slice(0,2)
+              }
+              this.setState({ 'glyphText': e.target.value });
+            }}
+            type="text"
+          />
+          <br/>
+          <TextField
             id="inMinSize"
             label="Min Size"
             value={this.state.minSize}
@@ -148,7 +162,7 @@ class App extends React.Component {
           <Button disabled={this.buttonEnabledState()} variant="contained" color="primary" onClick={this.clickRedraw.bind(this)}>Redraw</Button>
         </div>
         <div className="dotfield">
-          <Dotfield width="750" height="750" dots={this.state.dots} seed={this.state.dotSeed} offset={this.state.offset} padding={this.state.drawPadding} bFeather={this.state.feather} />
+          <Dotfield width="750" height="750" dots={this.state.dots} seed={this.state.dotSeed} offset={this.state.offset} padding={this.state.drawPadding} bFeather={this.state.feather} glyphs={this.state.glyphText} />
         </div>
       </div>
     );
