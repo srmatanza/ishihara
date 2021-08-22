@@ -6,7 +6,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField'
 
-import IshiharaPlate from './IshiharaPlate';
+import IshiharaPlate from './IshiharaPlate'
+import { Dot, Dotfield } from './Dotfield'
 import Ishihara from './Ishihara';
 
 // import logo from './logo.svg';
@@ -18,22 +19,29 @@ class App extends React.Component {
     super(props)
     this.state = {
       dots: {},
+      num_dots: 0,
       dotSeed: 42,
       glyphText: '2',
       offset: {x: 200, y: 100},
       minSize: 4,
-      maxSize: 23,
+      maxSize: 20,
       padding: 1,
       drawPadding: 1,
       feather: true
     };
+
+    this.dotfield = new Dotfield(750, 750, this.state.minSize, this.state.maxSize);
   }
 
   clickRender() {
     const seed = Math.random();
-    const dd = Ishihara(750, 750, this.state.minSize, this.state.maxSize, seed);
+    this.dotfield = new Dotfield(750, 750, this.state.minSize, this.state.maxSize);
+    this.dotfield.generateField(15, seed);
+    const dots = this.dotfield.fvDotBuffer;
+    const num_dots = this.dotfield.size;
     this.setState({
-      dots: dd
+      dots,
+      num_dots,
     });
   }
 
@@ -162,7 +170,7 @@ class App extends React.Component {
           <Button disabled={this.buttonEnabledState()} variant="contained" color="primary" onClick={this.clickRedraw.bind(this)}>Redraw</Button>
         </div>
         <div className="dotfield">
-          <IshiharaPlate width="750" height="750" dots={this.state.dots} seed={this.state.dotSeed} offset={this.state.offset} padding={this.state.drawPadding} bFeather={this.state.feather} glyphs={this.state.glyphText} />
+          <IshiharaPlate width="750" height="750" dots={this.state.dots} num_dots={this.state.num_dots} seed={this.state.dotSeed} offset={this.state.offset} padding={this.state.drawPadding} bFeather={this.state.feather} glyphs={this.state.glyphText} />
         </div>
       </div>
     );

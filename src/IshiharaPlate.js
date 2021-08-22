@@ -80,7 +80,7 @@ export default class IshiharaPlate extends Component {
               _g1 =  this.props.glyphs[0];
             }
             const path = font.getPath(_g1, 0, 500, 720);
-            console.log('path: ', path.toPathData());
+            // console.debug('path: ', path.toPathData());
             this.state.glyphPath = pisp.segments(path.toPathData());
           }
         });
@@ -116,18 +116,20 @@ export default class IshiharaPlate extends Component {
         const ctx = this.refs.canvas.getContext('2d');
         ctx.clearRect(0, 0, this.props.width, this.props.height);
         const dots = this.props.dots;
+        const num_dots = this.props.num_dots;
 
         const padding = this.props.padding;
 
         //let dRen = 0;
         const dA = new Date();
-        for(const dd in dots) {
+        for(let i=0; i<num_dots; i++) {
             //const color = dd.clr;
-            const dx = parseFloat(dots[dd].cx);
-            const dy = parseFloat(dots[dd].cy);
+            const dx = parseFloat(dots[i*4+0]);
+            const dy = parseFloat(dots[i*4+1]);
+            const dr = parseFloat(dots[i*4+2]);
           
             ctx.beginPath();
-            ctx.arc(dx, dy, dots[dd].r-padding, 0, 2*Math.PI);
+            ctx.arc(dx, dy, dr-padding, 0, 2*Math.PI);
 
             // For the color, see how close we are to the poly
 
@@ -139,7 +141,7 @@ export default class IshiharaPlate extends Component {
             const ddy = dy - this.props.offset.y;
 
             const pathSegments = this.state.glyphPath;
-            if(pathSegments) {
+            if(pathSegments && false) {
               if(pisp.isInside([ddx, ddy], pathSegments)) {
                   ctx.fillStyle = "#000";
               } else if(this.props.bFeather) {
@@ -183,7 +185,7 @@ export default class IshiharaPlate extends Component {
             //dRen++;
         }
         const dEnd = (new Date())-dA;
-        console.log("Render Time: " + dEnd);
+        console.log(`Render Time: ${dEnd}ms`);
         //console.log("dots rendered per sec: " + (dRen/(dEnd/10)));
     }
 
