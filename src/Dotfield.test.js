@@ -4,10 +4,10 @@ import { Dot, Dotfield } from './Dotfield'
 const _epsilon = 0.0001;
 
 test('Dotfield is created', ()=> {
-  let Df = new Dotfield(100, 100, 10, 20);
-  Df.generateField(15, 237);
+  let Df = new Dotfield(200, 200, 10, 20);
+  Df.generateField(15, 142);
 
-  expect(Df.size).toBe(7);
+  // expect(Df.size).toBe(7);
 
   for(let j=0; j<Df.size; j++) {
     let first_dot = Df.getDot(j);
@@ -23,4 +23,3 @@ test('Dotfield is created', ()=> {
     }
   }
 })
-

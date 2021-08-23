@@ -97,7 +97,7 @@ export default class IshiharaPlate extends Component {
         this.state.glyphPath = undefined;
         if(this.loadedFont && this.props.glyphs.length > 0) {
           const path = this.loadedFont.getPath(this.props.glyphs[0], 0, 500, 720);
-          console.log(`path: ${path.toPathData()}`);
+          // console.log(`path: ${path.toPathData()}`);
           this.state.glyphPath = pisp.segments(path.toPathData());
         }
         this.state.arng = new alea(this.props.seed);
@@ -141,7 +141,7 @@ export default class IshiharaPlate extends Component {
             const ddy = dy - this.props.offset.y;
 
             const pathSegments = this.state.glyphPath;
-            if(pathSegments && false) {
+            if(pathSegments) {
               if(pisp.isInside([ddx, ddy], pathSegments)) {
                   ctx.fillStyle = "#000";
               } else if(this.props.bFeather) {

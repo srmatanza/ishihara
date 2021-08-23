@@ -36,7 +36,7 @@ class App extends React.Component {
   clickRender() {
     const seed = Math.random();
     this.dotfield = new Dotfield(750, 750, this.state.minSize, this.state.maxSize);
-    this.dotfield.generateField(15, seed);
+    this.dotfield.generateField(30, seed);
     const dots = this.dotfield.fvDotBuffer;
     const num_dots = this.dotfield.size;
     this.setState({
