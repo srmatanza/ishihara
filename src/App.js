@@ -7,8 +7,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField'
 
 import IshiharaPlate from './IshiharaPlate'
-import { Dot, Dotfield } from './Dotfield'
-import Ishihara from './Ishihara';
+import { Dotfield } from './Dotfield'
 
 // import logo from './logo.svg';
 import './App.css';
@@ -21,7 +20,7 @@ class App extends React.Component {
       dots: {},
       num_dots: 0,
       dotSeed: 42,
-      glyphText: '2',
+      glyphText: '7',
       offset: {x: 200, y: 100},
       minSize: 4,
       maxSize: 20,

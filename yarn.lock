@@ -1945,10 +1945,10 @@ batch@0.6.1:
   resolved "https://registry.yarnpkg.com/batch/-/batch-0.6.1.tgz#dc34314f4e679318093fc760272525f94bf25c16"
   integrity sha1-3DQxT05nkxgJP8dgJyUl+UvyXBY=
 
-bezier-js@^2.4.0:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-2.6.1.tgz#ed9c6ebfcb3214794ff213cf90ee8aac644ecf7f"
-  integrity sha512-jelZM33eNzcZ9snJ/5HqJLw3IzXvA8RFcBjkdOB8SDYyOvW8Y2tTosojAiBTnD1MhbHoWUYNbxUXxBl61TxbRg==
+bezier-js@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-4.1.1.tgz#414df656833104e86765c0fa5e31439fb3e83a34"
+  integrity sha512-oVOS6SSFFFlfnZdzC+lsfvhs/RRcbxJ47U04M4s5QIBaJmr3YWmTIL3qmrOK9uW+nUUcl9Jccmo/xpTrG+bBoQ==
 
 big.js@^5.2.2:
   version "5.2.2"
@@ -4359,6 +4359,11 @@ levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
+
+line-intersect@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/line-intersect/-/line-intersect-3.0.0.tgz#7e0808c80edda012586e125374af2db4dd62c987"
+  integrity sha512-MAkwgBwwpyJhTWZ9EppTTFD6JxzYgh3BZxgI41CA2vSlANu4s5CXyTEJxKU3LRHitcF2vObHvE/s/lHxvKl2Kw==
 
 loader-runner@^4.2.0:
   version "4.2.0"

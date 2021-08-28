@@ -37,7 +37,7 @@ export class Dotfield {
     this.max_radius = maxr
 
     this.max_dots = 16*1024;
-    this.fvDotBuffer = new Float32Array(this.max_dots*4);
+    this.fvDotBuffer = new Float32Array(this.max_dots*3);
     this.size = 0;
 
     this.grid_res = maxr;
@@ -48,7 +48,7 @@ export class Dotfield {
     const x = this.fvDotBuffer[idx*4+0]
     const y = this.fvDotBuffer[idx*4+1]
     const r = this.fvDotBuffer[idx*4+2]
-    const g = this.fvDotBuffer[idx*4+3]
+    const g = 0; // this.fvDotBuffer[idx*4+3]
 
     return new Dot(x, y, r, g);
   }
@@ -57,7 +57,7 @@ export class Dotfield {
     this.fvDotBuffer[idx*4+0] = dot.x;
     this.fvDotBuffer[idx*4+1] = dot.y;
     this.fvDotBuffer[idx*4+2] = dot.radius;
-    this.fvDotBuffer[idx*4+3] = dot.gradient;
+    // this.fvDotBuffer[idx*4+3] = dot.gradient;
 
     this.addDotToGrid(idx, dot);
   }
@@ -126,6 +126,10 @@ export class Dotfield {
     for(let i=1; i<this.size; i++) {
       // Compare each point to the input dot
       const cmp_dot = this.getDot(i);
+
+      // Bail early if the bounding box doesn't clip
+      cmp_dot.x - cmp_dot.radius
+      //
       const cmp_dist = distance(dot, cmp_dot) - cmp_dot.radius;
 
       if(cmp_dist < nearest_dist) {
@@ -154,7 +158,10 @@ export class Dotfield {
     const arng = new alea(_seed);
 
     this.dot_grid = [];
-    let initial_dot = new Dot(this.width/2, this.height/2, this.max_radius, 1.0);
+
+    const init_width = this.width/2 + arng()*200-100;
+    const init_height = this.height/2 + arng()*200-100;
+    let initial_dot = new Dot(init_width, init_height, this.max_radius, 1.0);
     this.setDot(0, initial_dot);
     const Actives = [initial_dot];
 
@@ -204,5 +211,6 @@ export class Dotfield {
 
     const d_run_time = (new Date())-d_start_time;
     console.debug(`Time to generate ${this.size} dots: ${d_run_time}ms`);
+    this.dot_grid = []; // Release the memory for the dot_grid
   }
 }

@@ -1,72 +1,41 @@
 import React, { Component } from 'react';
 import alea from 'seedrandom';
-import pisp from 'point-in-svg-polygon';
-import Bezier from 'bezier-js';
+import { parseSVG, makeAbsolute } from 'svg-path-parser';
 import opentype from 'opentype.js';
+import { Bezier } from 'bezier-js';
+import { checkIntersection } from 'line-intersect';
 
-import {Point} from './point';
-import {SDF} from './sdf';
+import { Point } from './point';
+import { SDF } from './sdf';
 
 const sevenPath = "M 39 155.25 L 0 155.25 L 0 0 L 369 0 L 369 36 Q 274.5 169.5 220.125 313.875 A 1159.759 1159.759 0 0 0 188.813 408.391 Q 175.283 456.511 168.73 499.182 A 515.65 515.65 0 0 0 162.75 562.5 L 70.5 562.5 A 820.015 820.015 0 0 1 97.736 466.628 Q 123.293 392.859 165.375 308.25 A 1466.84 1466.84 0 0 1 249.974 159.565 A 1164.059 1164.059 0 0 1 322.5 60 L 59.25 60 L 39 155.25 Z";
 
-var hexTriple = function(strHex) {
-    const rHexLong = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i
-
-    const matchA = rHexLong.exec(strHex)
-
-    return {r: parseInt(matchA[1], 16),
-            g: parseInt(matchA[2], 16),
-            b: parseInt(matchA[3], 16)}
+var clamp = function(val, min, max) {
+    return Math.max(min||0, Math.min(max||1, val));
 }
 
-var hexToString = function(ht) {
-    return "#" + ht.r.toString(16).padStart(2, "0") +
-                 ht.g.toString(16).padStart(2, "0") +
-                 ht.b.toString(16).padStart(2, "0");
+var blend_rgb_tuples = function(rgb_1, rgb_2, interpolation) {
+    const t = clamp(interpolation);
+    const r = rgb_1[0]*(1-t) + rgb_2[0]*(t);
+    const g = rgb_1[1]*(1-t) + rgb_2[1]*(t);
+    const b = rgb_1[2]*(1-t) + rgb_2[2]*(t);
+
+    return [r, g, b];
 }
 
-var blendHexColors = function(hexA, hexB, amt) {
-    const htA = hexTriple(hexA);
-    const htB = hexTriple(hexB);
-
-    let rA = parseInt(htA.r, 16),
-        gA = parseInt(htA.g, 16),
-        bA = parseInt(htA.b, 16);
-    let rB = parseInt(htB.r, 16),
-        gB = parseInt(htB.g, 16),
-        bB = parseInt(htB.b, 16);
-    
-    let cT = 1.0 - amt;
-    let cU = amt;
-    const fillTriple = {
-        r: parseInt(cT*rA+cU*rB),
-        g: parseInt(cT*gA+cU*gB),
-        b: parseInt(cT*bA+cU*bB)
-    };
-    var fillCol = hexToString(fillTriple);
-
-    return fillCol;
-}
-
-var colorBrightness = function(hex, dBright) {
-    const hh = hexTriple(hex);
-}
-
-// Draw the dotfield once, save the blending values for the dots inside or near the glyphs.
+const field_color = [41, 84, 3];
+const glyph_color = [255, 107, 33];
 
 export default class IshiharaPlate extends Component {
 
     constructor(props) {
         super(props);
         const initialSeed = props.seed||42;
-        const segments = pisp.segments(sevenPath);
+        const segments = makeAbsolute(parseSVG(sevenPath));
         console.log(segments);
 
-        this.colorA = this.props.colorA||"#ff0000";
-        this.colorB = this.props.colorB||"#000000";
         this.state = {
             arng: new alea(initialSeed),
-            pathSeg: segments,
             glyphPath: segments
         }
 
@@ -80,8 +49,7 @@ export default class IshiharaPlate extends Component {
               _g1 =  this.props.glyphs[0];
             }
             const path = font.getPath(_g1, 0, 500, 720);
-            // console.debug('path: ', path.toPathData());
-            this.state.glyphPath = pisp.segments(path.toPathData());
+            this.state.glyphPath = makeAbsolute(parseSVG(path.toPathData()));
           }
         });
 
@@ -97,8 +65,9 @@ export default class IshiharaPlate extends Component {
         this.state.glyphPath = undefined;
         if(this.loadedFont && this.props.glyphs.length > 0) {
           const path = this.loadedFont.getPath(this.props.glyphs[0], 0, 500, 720);
+          this.state.glyphPath = makeAbsolute(parseSVG(path.toPathData()));
           // console.log(`path: ${path.toPathData()}`);
-          this.state.glyphPath = pisp.segments(path.toPathData());
+          // this.state.glyphPath = pisp.segments(path.toPathData());
         }
         this.state.arng = new alea(this.props.seed);
         let bDiff = false
@@ -109,6 +78,56 @@ export default class IshiharaPlate extends Component {
         }
         if(bDiff) {
           setTimeout(this.updateCanvas.bind(this), 0);
+        }
+    }
+
+    getVariantColor(rgb_tuple, color_variance) {
+        const v = color_variance ? color_variance*100-50 : 0;
+        return [clamp(rgb_tuple[0]+v, 0, 255), clamp(rgb_tuple[1]+v, 0, 255), clamp(rgb_tuple[2]+v, 0, 255)];
+    }
+
+    toRgb(rgb_tuple) {
+        return `rgb(${rgb_tuple[0]}, ${rgb_tuple[1]}, ${rgb_tuple[2]})`
+    }
+
+    isInside(pt, pathSegments) {
+
+        let ret = 0;
+        for(const seg of pathSegments) {
+            switch(seg.code) {
+                case "L":
+                case "Z":
+                    const int = checkIntersection(0, 0, pt[0], pt[1], seg.x, seg.y, seg.x0, seg.y0);
+                    ret += int.type == 'intersecting' ? 1 : 0;
+                    break;
+                case "Q":
+                    const curve = new Bezier(seg.x0, seg.y0, seg.x1, seg.y1, seg.x, seg.y);
+                    const line = { p1: {x: 0, y: 0}, p2: {x: pt[0], y: pt[1] }};
+                    const intersections = curve.lineIntersects(line);
+                    ret += intersections.length;
+                    break;
+            }
+        }
+
+        return ret%2;
+    }
+
+    drawGlyph(ctx) {
+        for(const seg of this.state.glyphPath) {
+            ctx.beginPath();
+            ctx.moveTo(seg.x0, seg.y0);
+            switch(seg.code) {
+                case "L":
+                case "Z":
+                    ctx.lineTo(seg.x, seg.y);
+                    ctx.strokeStyle = "rgb(255, 0, 0)";
+                    break;
+                case "Q":
+                    ctx.quadraticCurveTo(seg.x1, seg.y1, seg.x, seg.y);
+                    ctx.strokeStyle = "rgb(0, 0, 255)";
+                    break;
+            }
+            ctx.stroke();
         }
     }
 
@@ -131,66 +150,51 @@ export default class IshiharaPlate extends Component {
             ctx.beginPath();
             ctx.arc(dx, dy, dr-padding, 0, 2*Math.PI);
 
-            // For the color, see how close we are to the poly
-
-            const mm = parseInt(this.state.arng()*4)+9;
-            const dHex = mm.toString(16);
-            const randFill = "#ff"+dHex+dHex+dHex+dHex;
-            ctx.fillStyle = randFill;
+            const randFill = this.getVariantColor(field_color, this.state.arng());
+            ctx.fillStyle = this.toRgb(randFill);
             const ddx = dx - this.props.offset.x;
             const ddy = dy - this.props.offset.y;
 
             const pathSegments = this.state.glyphPath;
             if(pathSegments) {
-              if(pisp.isInside([ddx, ddy], pathSegments)) {
-                  ctx.fillStyle = "#000";
+              if(this.isInside([ddx, ddy], pathSegments)) {
+                  ctx.fillStyle = this.toRgb(this.getVariantColor(glyph_color, this.state.arng()));
               } else if(this.props.bFeather) {
                   const maxRange = 750;
                   let minSqDist = maxRange;
                   // if it's not inside, then let's see how close we are --
                   for(const seg of pathSegments) {
-                      switch(seg.type) {
-                          case "line":
-                              const ptA = seg.coords[0];
-                              const ptB = seg.coords[1];
-                              const lineDist = SDF.sdLine(Point(ddx, ddy), Point(ptA[0], ptA[1]), Point(ptB[0], ptB[1]));
+                      switch(seg.code) {
+                          case "L":
+                              const ptA = new Point(seg.x0, seg.y0);
+                              const ptB = new Point(seg.x, seg.y);
+                              const lineDist = SDF.sdLine(Point(ddx, ddy), ptA, ptB);
                               minSqDist = Math.min(minSqDist, lineDist);
                               break;
-                          case "bezier3":
-                              const curve = new Bezier(seg.coords[0][0],
-                                                       seg.coords[0][1],
-                                                       seg.coords[1][0],
-                                                       seg.coords[1][1],
-                                                       seg.coords[2][0],
-                                                       seg.coords[2][1],
-                                                       seg.coords[3][0],
-                                                       seg.coords[3][1]);
-                              const p = curve.project({x: ddx, y: ddy});
-                              const distSq = (ddx-p.x)*(ddx-p.x) + (ddy-p.y)*(ddy-p.y);
-                              minSqDist = Math.min(minSqDist, distSq);
+                          case "Q":
                               break;
                       }
                   }
                   if(minSqDist < maxRange) {
 
                       const pct = minSqDist/maxRange;
-                      const fillClr = blendHexColors("#000000", randFill, pct);
+                      const gc = this.getVariantColor(glyph_color, this.state.arng());
+                      const fillClr = blend_rgb_tuples(gc, randFill, pct);
 
-                      ctx.fillStyle = fillClr;
+                      ctx.fillStyle = this.toRgb(fillClr);
                   }
               }
             }
             ctx.fill();
-
-            //dRen++;
         }
+
+        // this.drawGlyph(ctx);
+
         const dEnd = (new Date())-dA;
         console.log(`Render Time: ${dEnd}ms`);
-        //console.log("dots rendered per sec: " + (dRen/(dEnd/10)));
     }
 
     render() {
-        // console.log(this.props);
         return (
             <canvas id="dotfield" ref="canvas" width={this.props.width} height={this.props.height}/>
         )
