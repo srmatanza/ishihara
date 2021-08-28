@@ -177,9 +177,10 @@ export default class IshiharaPlate extends Component {
                   }
                   if(minSqDist < maxRange) {
 
-                      const pct = minSqDist/maxRange;
+                      const pct = -(minSqDist-maxRange)/maxRange;
+                      // const pct = 1/(minSqDist+1);
                       const gc = this.getVariantColor(glyph_color, this.state.arng());
-                      const fillClr = blend_rgb_tuples(gc, randFill, pct);
+                      const fillClr = blend_rgb_tuples(randFill, gc, pct);
 
                       ctx.fillStyle = this.toRgb(fillClr);
                   }
