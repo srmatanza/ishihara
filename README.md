@@ -1,5 +1,7 @@
 ## Ishihara Plate Generator
-This isn't actually a colorblindness test, I just think the plates look neat, and so I wanted to try and generate them with customizable glyphs.
+This isn't actually a colorblindness test, I just think the plates look neat, and so I wanted to try and generate them with customizable glyphs. Here's an example!
+
+<img src="dotfield_7.png" alt="Example dotfield" width="525" />
 
 ## Available Scripts
 
