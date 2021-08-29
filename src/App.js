@@ -26,7 +26,7 @@ class App extends React.Component {
       maxSize: 20,
       padding: 1,
       drawPadding: 1,
-      feather: true
+      feather: false
     };
 
     this.dotfield = new Dotfield(750, 750, this.state.minSize, this.state.maxSize);

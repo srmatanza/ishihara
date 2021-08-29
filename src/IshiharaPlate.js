@@ -8,7 +8,9 @@ import { checkIntersection } from 'line-intersect';
 import { Point } from './point';
 import { SDF } from './sdf';
 
-const sevenPath = "M 39 155.25 L 0 155.25 L 0 0 L 369 0 L 369 36 Q 274.5 169.5 220.125 313.875 A 1159.759 1159.759 0 0 0 188.813 408.391 Q 175.283 456.511 168.73 499.182 A 515.65 515.65 0 0 0 162.75 562.5 L 70.5 562.5 A 820.015 820.015 0 0 1 97.736 466.628 Q 123.293 392.859 165.375 308.25 A 1466.84 1466.84 0 0 1 249.974 159.565 A 1164.059 1164.059 0 0 1 322.5 60 L 59.25 60 L 39 155.25 Z";
+const sevenPath = "M171.08 261.20L263.56 83.72L137.08 83.72Q110.56 83.72 94.24 85.42Q77.92 87.12 67.72 92.90Q57.52 98.68 51.06 109.56Q44.60 120.44 37.80 139.48L37.80 139.48L27.60 166L1.76 166L49.36-24.40L76.56-24.40Q75.20-21 74.52-14.54Q73.84-8.08 73.84-3.32L73.84-3.32Q73.84 8.24 84.04 12.32Q94.24 16.40 125.52 16.40L125.52 16.40L324.76 16.40L324.76 30.00Q302.32 81.00 284.98 120.10Q267.64 159.20 253.70 191.50Q239.76 223.80 228.20 252.36Q216.64 280.92 204.74 310.16Q192.84 339.40 180.26 372.72Q167.68 406.04 152.04 447.52L152.04 447.52Q140.48 478.12 131.30 497.16Q122.12 516.20 113.96 527.42Q105.80 538.64 97.98 542.72Q90.16 546.80 81.32 546.80L81.32 546.80Q69.08 546.80 60.58 537.62Q52.08 528.44 52.08 518.92L52.08 518.92Q52.08 513.48 53.10 507.02Q54.12 500.56 57.86 490.02Q61.60 479.48 69.42 462.48Q77.24 445.48 90.50 418.96Q103.76 392.44 123.48 354.02Q143.20 315.60 171.08 261.20L171.08 261.20Z";
+const glyph_typeface = 'LibreBaskerville-Regular.ttf';
+// const glyph_typeface = 'NotoSans-Regular.ttf';
 
 var clamp = function(val, min, max) {
     return Math.max(min||0, Math.min(max||1, val));
@@ -39,7 +41,10 @@ export default class IshiharaPlate extends Component {
             glyphPath: segments
         }
 
-        opentype.load('NotoSans-Regular.ttf', (err, font) => {
+        this.glyph_pt_size = 680;
+        this.glyph_offset = [-20, 540];
+
+        opentype.load(glyph_typeface, (err, font) => {
           if(err) { 
             console.error('Could not load font.');
           } else {
@@ -48,25 +53,24 @@ export default class IshiharaPlate extends Component {
             if(this.props.glyphs) {
               _g1 =  this.props.glyphs[0];
             }
-            const path = font.getPath(_g1, 0, 500, 720);
+            const path = font.getPath(_g1, ...this.glyph_offset, this.glyph_pt_size);
             this.state.glyphPath = makeAbsolute(parseSVG(path.toPathData()));
           }
         });
-
     }
 
     componentDidMount() {
-        console.log("First arng: ", this.state.arng());
+        // console.log("First arng: ", this.state.arng());
         setTimeout(this.updateCanvas.bind(this), 0);
     }
 
     componentDidUpdate(prevProps, prevState) {
         console.log('Dotfield update: ', this.props, prevProps, this.state, prevState)
-        this.state.glyphPath = undefined;
+        // this.state.glyphPath = undefined;
         if(this.loadedFont && this.props.glyphs.length > 0) {
-          const path = this.loadedFont.getPath(this.props.glyphs[0], 0, 500, 720);
+          const path = this.loadedFont.getPath(this.props.glyphs[0], ...this.glyph_offset, this.glyph_pt_size);
           this.state.glyphPath = makeAbsolute(parseSVG(path.toPathData()));
-          // console.log(`path: ${path.toPathData()}`);
+          // console.debug(`path: ${path.toPathData()}`);
           // this.state.glyphPath = pisp.segments(path.toPathData());
         }
         this.state.arng = new alea(this.props.seed);
